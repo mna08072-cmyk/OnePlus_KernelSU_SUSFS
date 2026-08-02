@@ -1244,6 +1244,38 @@ runs:
         
         echo "::endgroup::"
 
+    - name: Add NoMount
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "::group::Add NoMount"
+        rm -rf "$GITHUB_WORKSPACE/nomount"
+        git clone --branch dev --depth 1 https://github.com/maxsteeel/nomount "$GITHUB_WORKSPACE/nomount"
+        echo "Using nomount commit:"
+        git -C "$GITHUB_WORKSPACE/nomount" log -1 --oneline
+
+        PATCH_FILE="$GITHUB_WORKSPACE/nomount/kernel/patches/nomount_${{ env.KERNEL_VER }}_kernel_integration.patch"
+        if [ ! -f "$PATCH_FILE" ]; then
+          echo "::error::No nomount patch found for kernel version ${{ env.KERNEL_VER }}"
+          exit 1
+        fi
+
+        cd "$COMMON_KERNEL_FOLDER"
+        echo "Applying: $(basename "$PATCH_FILE")"
+        patch -p1 --forward --fuzz=3 < "$PATCH_FILE"
+
+        cp "$GITHUB_WORKSPACE/nomount/kernel/src/"* "$COMMON_KERNEL_FOLDER/fs/"
+        echo "Copied nomount source files:"
+        ls -la "$COMMON_KERNEL_FOLDER/fs/" | grep -i nomount
+
+        echo "Add NoMount Configuration Settings"
+        cat >> "$COMMON_KERNEL_FOLDER/arch/arm64/configs/gki_defconfig" <<EOF2
+        CONFIG_NOMOUNT=y
+        EOF2
+
+        echo "✅ NoMount added"
+        echo "::endgroup::"
+
     - name: Add BBG
       if: ${{ env.OP_BBG == 'true' }}
       shell: bash
