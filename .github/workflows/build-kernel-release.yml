@@ -34,6 +34,12 @@ on:
         required: true
         type: string
         default: '[{"type":"ksun","hash":"dev"}]'
+      nomount_branch:
+        description: 'NoMount branch to use'
+        required: true
+        type: choice
+        options: [dev, master]
+        default: dev
       optimize_level:
         description: "Compiler optimization level"
         required: true
@@ -698,6 +704,7 @@ jobs:
           ksu_type: ${{ matrix.ksu_type }}
           ksu_branch_or_hash: ${{ matrix.ksu_resolved_hash }}
           susfs_commit_hash_or_branch: ${{ matrix.susfs_resolved_hash }}
+          nomount_branch: ${{ inputs.nomount_branch }}
           optimize_level: ${{ inputs.optimize_level }}
           build_timestamp: ${{ inputs.build_timestamp }}
           clean: ${{ inputs.clean_build }}

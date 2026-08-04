@@ -22,6 +22,11 @@ inputs:
     required: false
     type: string
     default: ""
+  nomount_branch:
+    description: 'NoMount branch to use (dev or master)'
+    required: false
+    type: string
+    default: "dev"
   build_timestamp:
     description: 'Custom kernel build timestamp shown in uname -a (e.g. "Tue Feb 10 10:01:02 UTC 2026"). Leave empty to use the current build time.'
     required: false
@@ -1250,7 +1255,7 @@ runs:
         set -euo pipefail
         echo "::group::Add NoMount"
         rm -rf "$GITHUB_WORKSPACE/nomount"
-        git clone --branch dev --depth 1 https://github.com/maxsteeel/nomount "$GITHUB_WORKSPACE/nomount"
+        git clone --branch "${{ inputs.nomount_branch }}" --depth 1 https://github.com/maxsteeel/nomount "$GITHUB_WORKSPACE/nomount"
         echo "Using nomount commit:"
         git -C "$GITHUB_WORKSPACE/nomount" log -1 --oneline
 
